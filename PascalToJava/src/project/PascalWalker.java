@@ -1,6 +1,7 @@
 package project;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -141,12 +142,6 @@ public class PascalWalker extends PascalBaseListener{
       if (FirstTimeIdentifier) {
          translatedSource += ctx.getText() + "{" + newline;
          FirstTimeIdentifier = false;
-      }
-      else if (ctx.getText().equals("input") || ctx.getText().equals("output")) {
-
-      }
-      else {
-         translatedSource += ctx.getText() + " ";
       }
 
    }
@@ -722,7 +717,7 @@ public class PascalWalker extends PascalBaseListener{
 	@Override
 	public void enterVariableDeclarationPart(VariableDeclarationPartContext ctx) {
 		// TODO Auto-generated method stub
-		super.enterVariableDeclarationPart(ctx);
+	   super.enterVariableDeclarationPart(ctx);
 	   System.out.println("enterVariableDeclarationPart" + " :--> " + ctx.getText()  + newline);
 	}
 
@@ -744,6 +739,9 @@ public class PascalWalker extends PascalBaseListener{
 	public void exitVariableDeclaration(VariableDeclarationContext ctx) {
 		// TODO Auto-generated method stub
 		super.exitVariableDeclaration(ctx);
+		String array[] = ctx.getText().split(":");
+		String varType = array[1].replace("integer", "int");
+		translatedSource+="   public " + varType + " " + array[0] +";"  + newline;
 	   System.out.println("exitVariableDeclaration" + " :--> " + ctx.getText()  + newline);
 	}
 
