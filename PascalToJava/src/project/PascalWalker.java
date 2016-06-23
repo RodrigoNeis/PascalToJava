@@ -103,8 +103,8 @@ public class PascalWalker extends PascalBaseListener{
    public String newline = System.getProperty("line.separator");
    public static boolean addOnNextExp = false;
    public String cont = "";
-   public boolean FirstTimeIdentifier = true;
-
+   public boolean firstTimeIdentifier = true;
+   public boolean firstTimeCompStat = true;
 
 
 	@Override
@@ -119,6 +119,8 @@ public class PascalWalker extends PascalBaseListener{
    @Override
    public void exitProgram(ProgramContext ctx) {
       super.exitProgram(ctx);
+      //end of main method
+      translatedSource += newline + "   }";
       translatedSource += newline + "}";
    }
 
@@ -139,9 +141,9 @@ public class PascalWalker extends PascalBaseListener{
    public void enterIdentifier(IdentifierContext ctx) {
       // can be any identifier like int boolean
       super.enterIdentifier(ctx);
-      if (FirstTimeIdentifier) {
+      if (firstTimeIdentifier) {
          translatedSource += ctx.getText() + "{" + newline;
-         FirstTimeIdentifier = false;
+         firstTimeIdentifier = false;
       }
 
    }
@@ -740,7 +742,7 @@ public class PascalWalker extends PascalBaseListener{
 		// TODO Auto-generated method stub
 		super.exitVariableDeclaration(ctx);
 		String array[] = ctx.getText().split(":");
-		String varType = array[1].replace("integer", "int");
+		String varType = array[1].replace("integer", "int").replace("string", "String");
 		translatedSource+="   public " + varType + " " + array[0] +";"  + newline;
 	   System.out.println("exitVariableDeclaration" + " :--> " + ctx.getText()  + newline);
 	}
@@ -915,8 +917,31 @@ public class PascalWalker extends PascalBaseListener{
 	@Override
 	public void enterSimpleStatement(SimpleStatementContext ctx) {
 		// TODO Auto-generated method stub
+		// econtra write e read
 		super.enterSimpleStatement(ctx);
-	   System.out.println("enterSimpleStatement" + " :--> " + ctx.getText()  + newline);
+		String aux = "";
+
+		if ("writeln".equals(ctx.getStart().getText())) {
+			int first = ctx.getText().indexOf("(");
+			int last = ctx.getText().lastIndexOf(")");
+
+			if (first >= 0 && last >= 0) {
+				aux = ctx.getText().substring(first + 2, last - 1);
+				translatedSource += "    System.out.println(\"" + aux + "\");" + newline;
+			}
+
+		} else if ("write".equals(ctx.getStart().getText())) {
+			int first = ctx.getText().indexOf("(");
+			int last = ctx.getText().lastIndexOf(")");
+
+			if (first >= 0 && last >= 0) {
+				aux = ctx.getText().substring(first + 2, last - 1);
+				translatedSource += "    System.out.print(\"" + aux + "\");" + newline;
+			}
+		} else if ("read".equals(ctx.getStart().getText())) {
+
+		}
+		System.out.println("enterSimpleStatement" + " :--> " + ctx.getText() + newline);
 	}
 
 	@Override
@@ -1194,8 +1219,12 @@ public class PascalWalker extends PascalBaseListener{
 
 	@Override
 	public void enterCompoundStatement(CompoundStatementContext ctx) {
-		// TODO Auto-generated method stub
 		super.enterCompoundStatement(ctx);
+		ctx.BEGIN().getText();
+		if(firstTimeCompStat){
+		translatedSource+= "   public static void main(String[] args) {" + newline;
+		firstTimeCompStat = false;
+		}
 	   System.out.println("enterCompoundStatement" + " :--> " + ctx.getText()  + newline);
 	}
 
